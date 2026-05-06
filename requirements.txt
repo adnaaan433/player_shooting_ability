@@ -1,0 +1,7 @@
+streamlit>=1.56.0
+pandas>=2.2.2
+numpy>=2.0.0
+matplotlib>=3.8.4
+mplsoccer>=1.4.0
+scipy>=1.14.0
+requests>=2.32.3
