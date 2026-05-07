@@ -1,17 +1,20 @@
 import os
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Arc
 from matplotlib.font_manager import FontProperties
-from mplsoccer import VerticalPitch
+from mplsoccer import VerticalPitch, add_image
 from scipy.stats import percentileofscore
+from urllib.request import urlopen
+from PIL import Image
 
 _DIR = os.path.dirname(os.path.abspath(__file__))
 bold_font = FontProperties(fname=os.path.join(_DIR, 'MontserratAlternates-Bold.ttf'))
 reg_font = FontProperties(fname=os.path.join(_DIR, 'NotoSans-Regular.ttf'))
-
+con_font = FontProperties(fname=os.path.join(_DIR, 'NotoSans_Condensed-Regular.ttf'))
 
 def plot_player_dashboard(player_df, player_agg, selected_player, selected_display_name,
                           selected_team, selected_comp_name, selected_season_name,
@@ -412,17 +415,30 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
                        fontsize=12, color='black', transform=bottom_ax.transAxes,
                        fontproperties=reg_font)
     
+    # ── Logo ──
+    _teams_csv = os.path.join(_DIR, 'teams_name_and_id_Statsbomb_Names.csv')
+    _teams_df = pd.read_csv(_teams_csv, index_col=0)
+    _match = _teams_df[_teams_df['teamName'] == selected_team]
+    ftmb_tid = int(_match['teamId'].iloc[0]) if not _match.empty else None
+    if ftmb_tid:
+        try:
+            himage = urlopen(f"https://images.fotmob.com/image_resources/logo/teamlogo/{ftmb_tid}.png")
+            himage = Image.open(himage)
+            ax_himage = add_image(himage, fig, left=0.115, bottom=0.925, width=0.12, height=0.12)
+        except Exception:
+            pass
+
     # ── Title Text ──
-    fig.text(0.125, 1, f"{selected_display_name}",
+    fig.text(0.23, 1, f"{selected_display_name}",
              fontsize=30, fontproperties=bold_font, color='black', ha='left', va='bottom')
-    fig.text(0.125, 0.97,
+    fig.text(0.23, 0.97,
              f"for {selected_team}, in {selected_comp_name} {selected_season_name} season | "
              f"Minutes Played: {int(total_minutes)} | Data: StatsBomb | Made by: @adnaaan433",
-             ha='left', va='bottom', fontsize=13, fontproperties=reg_font)
+             ha='left', va='bottom', fontsize=13, fontproperties=con_font)
     minutes_label = f"{min_minutes}+" if max_minutes >= 3500 else f"{min_minutes}-{max_minutes}"
-    fig.text(0.125, 0.94,
+    fig.text(0.23, 0.94,
              f"Non-Penalty Shots Only | Percentiles among {selected_comp_name} {position_filter}s "
              f"with {minutes_label} Minutes Played in {selected_season_name} season",
-             ha='left', va='bottom', fontsize=13, fontproperties=reg_font)
+             ha='left', va='bottom', fontsize=13, fontproperties=con_font)
     
     return fig
