@@ -227,7 +227,7 @@ if comps_df is not None and not comps_df.empty:
         
         def get_subset_stats(subset_df, prefix):
             if subset_df.empty:
-                df = pd.DataFrame(columns=[f'{prefix} Shots', f'{prefix} Shots Accuracy'])
+                df = pd.DataFrame(columns=[f'{prefix} Shots', f'{prefix} Shots Accuracy', f'{prefix} Conversion%'])
                 df.index.name = 'player_name'
                 return df
             agg = subset_df.groupby('player_name').agg({
@@ -237,9 +237,11 @@ if comps_df is not None and not comps_df.empty:
                 'is_post': 'sum'
             })
             acc = np.where(agg['x'] > 0, (agg['is_goal'] + agg['is_saved'] + 0.5 * agg['is_post']) / agg['x'], 0.0)
+            conv = np.where(agg['x'] > 0, agg['is_goal'] / agg['x'], 0.0)
             return pd.DataFrame({
                 f'{prefix} Shots': agg['x'],
-                f'{prefix} Shots Accuracy': acc
+                f'{prefix} Shots Accuracy': acc,
+                f'{prefix} Conversion%': conv
             })
 
         subset_stats = []

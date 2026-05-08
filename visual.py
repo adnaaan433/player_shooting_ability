@@ -378,15 +378,15 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
             ('Headed Shots', 'Headed Shots Accuracy'),
         ]
         situation_stats = [
-            ('First Touch Shots', 'First Touch Shots Accuracy'),
-            ('One on One Shots', 'One on One Shots Accuracy'),
-            ('Dribbled Shots', 'Dribbled Shots Accuracy'),
+            ('First Touch Shots', 'First Touch Conversion%'),
+            ('One on One Shots', 'One on One Conversion%'),
+            ('Dribbled Shots', 'Dribbled Conversion%'),
         ]
         
         # Title line
         bottom_ax.text(0.25, 0.9, "Body Part (Shot Accuracy%)", ha='center', va='center',
                        fontsize=15, fontproperties=bold_font, color='black', transform=bottom_ax.transAxes)
-        bottom_ax.text(0.75, 0.9, "Situation (Shot Accuracy%)", ha='center', va='center',
+        bottom_ax.text(0.75, 0.9, "Situation (Conversion%)", ha='center', va='center',
                        fontsize=15, fontproperties=bold_font, color='black', transform=bottom_ax.transAxes)
         
         # Separator line
@@ -406,11 +406,11 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
         
         # Situation stats line
         sit_parts = []
-        for vol_col, acc_col in situation_stats:
+        for vol_col, conv_col in situation_stats:
             vol = int(player_agg.loc[selected_player, vol_col]) if vol_col in player_agg.columns else 0
-            acc = player_agg.loc[selected_player, acc_col] * 100 if acc_col in player_agg.columns else 0.0
+            conv = player_agg.loc[selected_player, conv_col] * 100 if conv_col in player_agg.columns else 0.0
             label = vol_col.replace(' Shots', '')
-            sit_parts.append(f"{label}: {vol} ({acc:.1f}%)")
+            sit_parts.append(f"{label}: {vol} ({conv:.1f}%)")
         bottom_ax.text(0.75, 0.55, "   |   ".join(sit_parts), ha='center', va='center',
                        fontsize=12, color='black', transform=bottom_ax.transAxes,
                        fontproperties=reg_font)
