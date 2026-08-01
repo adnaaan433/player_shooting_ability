@@ -436,8 +436,16 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
              f"Minutes Played: {int(total_minutes)} | Data: StatsBomb | Made by: @adnaaan433",
              ha='left', va='bottom', fontsize=13, fontproperties=con_font)
     minutes_label = f"{min_minutes}+" if max_minutes >= 3500 else f"{min_minutes}-{max_minutes}"
+    if isinstance(position_filter, list):
+        if not position_filter or set(position_filter) == {'CF', 'Winger/AM', 'Mid', 'FB', 'CB'}:
+            pos_desc = "All"
+        else:
+            pos_desc = f"{'/'.join(position_filter)}s"
+    else:
+        pos_desc = f"{position_filter}s" if position_filter != 'All' else "All"
+        
     fig.text(0.23, 0.94,
-             f"Non-Penalty Shots Only | Percentiles among {selected_comp_name} {position_filter}s "
+             f"Non-Penalty Shots Only | Percentiles among {selected_comp_name} {pos_desc} "
              f"with {minutes_label} Minutes Played in {selected_season_name} season",
              ha='left', va='bottom', fontsize=13, fontproperties=con_font)
     

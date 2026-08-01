@@ -98,23 +98,24 @@ if comps_df is not None and not comps_df.empty:
         
         import numpy as np
         st.header("Player Shooting Stats")
-        position_filter = st.selectbox("Filter by Position", ['All', 'CF', 'Winger/AM', 'Mid', 'FB', 'CB'])
+        position_options = ['CF', 'Winger/AM', 'Mid', 'FB', 'CB']
+        position_filter = st.multiselect("Filter by Position", position_options, default=position_options)
         mcol1, mcol2 = st.columns(2)
         min_minutes = mcol1.number_input("Min Minutes Played", min_value=0, max_value=5000, value=1000, step=50)
         max_minutes = mcol2.number_input("Max Minutes Played", min_value=0, max_value=5000, value=5000, step=50)
         
         df_shots = df.copy()
-        if position_filter != 'All' and 'primary_position' in df_shots.columns:
-            if position_filter == 'CF':
-                pf = ['Centre Forward', 'Left Centre Forward', 'Right Centre Forward', 'Secondary Striker']
-            elif position_filter == 'Winger/AM':
-                pf = ['Left Wing', 'Right Wing', 'Right Attacking Midfielder', 'Left Attacking Midfielder', 'Left Midfielder', 'Right Midfielder', 'Centre Attacking Midfielder']
-            elif position_filter == 'Mid':
-                pf = ['Centre Midfielder', 'Left Centre Midfielder', 'Right Centre Midfielder', 'Centre Defensive Midfielder', 'Left Defensive Midfielder', 'Right Defensive Midfielder']
-            elif position_filter == 'FB':
-                pf = ['Left Back', 'Right Back', 'Left Wing Back', 'Right Wing Back']
-            elif position_filter == 'CB':
-                pf = ['Left Centre Back', 'Right Centre Back', 'Centre Back']
+        position_map = {
+            'CF': ['Centre Forward', 'Left Centre Forward', 'Right Centre Forward', 'Secondary Striker'],
+            'Winger/AM': ['Left Wing', 'Right Wing', 'Right Attacking Midfielder', 'Left Attacking Midfielder', 'Left Midfielder', 'Right Midfielder', 'Centre Attacking Midfielder'],
+            'Mid': ['Centre Midfielder', 'Left Centre Midfielder', 'Right Centre Midfielder', 'Centre Defensive Midfielder', 'Left Defensive Midfielder', 'Right Defensive Midfielder'],
+            'FB': ['Left Back', 'Right Back', 'Left Wing Back', 'Right Wing Back'],
+            'CB': ['Left Centre Back', 'Right Centre Back', 'Centre Back']
+        }
+        if position_filter and 'primary_position' in df_shots.columns:
+            pf = []
+            for pos in position_filter:
+                pf.extend(position_map.get(pos, []))
             df_shots = df_shots[df_shots['primary_position'].isin(pf)]
             
         if 'under_pressure' not in df_shots.columns:
