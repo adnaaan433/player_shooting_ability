@@ -30,14 +30,21 @@ except Exception as e:
 if comps_df is not None and not comps_df.empty:
     with st.sidebar:
         st.header("Data Loading")
-        # Get unique competitions
-        competitions = comps_df[['competition_id', 'competition_name']].drop_duplicates().sort_values('competition_name')
+        # Get unique competitions with country name for distinct selection
+        competitions = comps_df[['competition_id', 'competition_name', 'country_name']].drop_duplicates().copy()
+        competitions['display_name'] = competitions.apply(
+            lambda r: f"{r['competition_name']} ({r['country_name']})" if pd.notna(r['country_name']) and r['country_name'] else r['competition_name'],
+            axis=1
+        )
+        competitions = competitions.sort_values('display_name')
         
-        # User selects competition
-        selected_comp_name = st.selectbox("Select Competition", competitions['competition_name'])
+        # User selects competition using display_name
+        selected_comp_display = st.selectbox("Select Competition", competitions['display_name'])
         
-        if selected_comp_name:
-            selected_comp_id = competitions[competitions['competition_name'] == selected_comp_name]['competition_id'].iloc[0]
+        if selected_comp_display:
+            selected_comp_row = competitions[competitions['display_name'] == selected_comp_display].iloc[0]
+            selected_comp_id = selected_comp_row['competition_id']
+            selected_comp_name = selected_comp_row['competition_name']
             
             # Get seasons for the selected competition
             seasons = comps_df[comps_df['competition_id'] == selected_comp_id][['season_id', 'season_name']].drop_duplicates().sort_values('season_name', ascending=False)
