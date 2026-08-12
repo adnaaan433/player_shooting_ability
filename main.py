@@ -171,7 +171,7 @@ if comps_df is not None and not comps_df.empty:
         if 'primary_position' in df_shots.columns:
             agg_funcs['primary_position'] = 'first'
             
-        player_agg = df_shots.groupby('player_name').agg(agg_funcs).rename(columns={
+        player_agg = df_shots.groupby(['player_name', 'team_name']).agg(agg_funcs).rename(columns={
             'x': 'Total Shots', 
             'is_goal': 'Total Goals',
             'shot_statsbomb_xg': 'Total xG', 
@@ -188,7 +188,7 @@ if comps_df is not None and not comps_df.empty:
         })
         
         up_shots = df_shots[df_shots['under_pressure']]
-        up_agg = up_shots.groupby('player_name').agg({
+        up_agg = up_shots.groupby(['player_name', 'team_name']).agg({
             'is_goal': 'sum',
             'shot_statsbomb_xg': 'sum',
             'shot_statsbomb_xg2': 'sum',
@@ -222,7 +222,7 @@ if comps_df is not None and not comps_df.empty:
         
         for label, subset in [('Low Chance', low_chance), ('Half Chance', half_chance), ('Big Chance', big_chance)]:
             if not subset.empty:
-                chance_agg = subset.groupby('player_name').agg({'x': 'count', 'is_goal': 'sum'})
+                chance_agg = subset.groupby(['player_name', 'team_name']).agg({'x': 'count', 'is_goal': 'sum'})
                 player_agg = player_agg.join(chance_agg.rename(columns={'x': f'{label} Shots', 'is_goal': f'{label} Goals'})).fillna(0)
             else:
                 player_agg[f'{label} Shots'] = 0
@@ -235,10 +235,10 @@ if comps_df is not None and not comps_df.empty:
         
         def get_subset_stats(subset_df, prefix):
             if subset_df.empty:
-                df = pd.DataFrame(columns=[f'{prefix} Shots', f'{prefix} Shots Accuracy', f'{prefix} Conversion%'])
-                df.index.name = 'player_name'
-                return df
-            agg = subset_df.groupby('player_name').agg({
+                df_sub = pd.DataFrame(columns=[f'{prefix} Shots', f'{prefix} Shots Accuracy', f'{prefix} Conversion%'])
+                df_sub.index = pd.MultiIndex.from_tuples([], names=['player_name', 'team_name'])
+                return df_sub
+            agg = subset_df.groupby(['player_name', 'team_name']).agg({
                 'x': 'count',
                 'is_goal': 'sum',
                 'is_saved': 'sum',
@@ -250,7 +250,7 @@ if comps_df is not None and not comps_df.empty:
                 f'{prefix} Shots': agg['x'],
                 f'{prefix} Shots Accuracy': acc,
                 f'{prefix} Conversion%': conv
-            })
+            }, index=agg.index)
 
         subset_stats = []
         if 'body_part_name' in df_shots.columns:

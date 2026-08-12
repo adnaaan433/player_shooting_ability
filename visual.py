@@ -251,7 +251,9 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
     stats_ax = fig.add_subplot(gs[0:3, 1])
     stats_ax.set_facecolor('#f5f5f5')
     
-    if selected_player in player_agg.index:
+    player_key = (selected_player, selected_team) if isinstance(player_agg.index, pd.MultiIndex) else selected_player
+    
+    if player_key in player_agg.index:
         stats_ax.set_title("Shooting Stats (per90)", color='black',
                            fontproperties=bold_font, fontsize=15, pad=0)
         for spine in stats_ax.spines.values():
@@ -279,7 +281,7 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
         p_vals = []
         p_pcts = []
         for m in metrics_to_plot:
-            val = player_agg.loc[selected_player, m]
+            val = player_agg.loc[player_key, m]
             pct = percentileofscore(player_agg[m].dropna(), val)
             
             # Invert percentile for Avg. Shot Distance (lower distance = higher percentile)
@@ -327,7 +329,7 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
         for y, m, val, pct in zip(y_pos, metrics_to_plot, p_vals, p_pcts):
             if 'per90' in m:
                 base_m = m.replace(' per90', '')
-                base_val = player_agg.loc[selected_player, base_m]
+                base_val = player_agg.loc[player_key, base_m]
                 display_base = display_name_map.get(base_m, base_m)
                 if base_m in ['Total Shots', 'Total Goals', 'Low Chance Shots',
                               'Half Chance Shots', 'Big Chance Shots']:
@@ -371,7 +373,7 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
     bottom_ax.tick_params(bottom=False, left=False, right=False, top=False,
                           labelbottom=False, labelleft=False)
     
-    if selected_player in player_agg.index:
+    if player_key in player_agg.index:
         body_part_stats = [
             ('Right Foot Shots', 'Right Foot Shots Accuracy'),
             ('Left Foot Shots', 'Left Foot Shots Accuracy'),
@@ -396,8 +398,8 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
         # Body Part stats line
         bp_parts = []
         for vol_col, acc_col in body_part_stats:
-            vol = int(player_agg.loc[selected_player, vol_col]) if vol_col in player_agg.columns else 0
-            acc = player_agg.loc[selected_player, acc_col] * 100 if acc_col in player_agg.columns else 0.0
+            vol = int(player_agg.loc[player_key, vol_col]) if vol_col in player_agg.columns else 0
+            acc = player_agg.loc[player_key, acc_col] * 100 if acc_col in player_agg.columns else 0.0
             label = vol_col.replace(' Shots', '')
             bp_parts.append(f"{label}: {vol} ({acc:.1f}%)")
         bottom_ax.text(0.25, 0.55, "   |   ".join(bp_parts), ha='center', va='center',
@@ -407,8 +409,8 @@ def plot_player_dashboard(player_df, player_agg, selected_player, selected_displ
         # Situation stats line
         sit_parts = []
         for vol_col, conv_col in situation_stats:
-            vol = int(player_agg.loc[selected_player, vol_col]) if vol_col in player_agg.columns else 0
-            conv = player_agg.loc[selected_player, conv_col] * 100 if conv_col in player_agg.columns else 0.0
+            vol = int(player_agg.loc[player_key, vol_col]) if vol_col in player_agg.columns else 0
+            conv = player_agg.loc[player_key, conv_col] * 100 if conv_col in player_agg.columns else 0.0
             label = vol_col.replace(' Shots', '')
             sit_parts.append(f"{label}: {vol} ({conv:.1f}%)")
         bottom_ax.text(0.75, 0.55, "   |   ".join(sit_parts), ha='center', va='center',
